@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DiskMaster (Offline Test)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: Arial, sans-serif; 
+      color: #f0f0f0; 
+      overflow-x: hidden; 
+      background: url('https://via.placeholder.com/1920x1080') no-repeat center center fixed; 
+      background-size: cover; 
+      position: relative; 
+      transition: all 0.3s ease;
+    }
+    body::before { 
+      content: ''; 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0, 0, 0, 0.5); 
+      z-index: -1; 
+    }
+    .nav-container { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      background: rgba(44, 44, 44, 0.9); 
+      padding: 10px; 
+      position: sticky; 
+      top: 0; 
+      z-index: 1000; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5); 
+      transition: padding 0.3s ease;
+    }
+    .nav-left { display: flex; align-items: center; }
+    .dropdown { position: relative; display: inline-block; margin-right: 15px; }
+    .dropbtn { 
+      background: linear-gradient(135deg, #4a90e2, #357abd); 
+      color: white; 
+      padding: 12px 20px; 
+      border: none; 
+      border-radius: 10px; 
+      cursor: pointer; 
+      font-size: 14px; 
+      font-weight: bold; 
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3); 
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+    .dropbtn:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .dropdown-content { 
+      display: none; 
+      position: absolute; 
+      background: rgba(44, 44, 44, 0.9); 
+      min-width: 160px; 
+      box-shadow: 0 8px 16px rgba(0,0,0,0.5); 
+      z-index: 1; 
+      border-radius: 10px; 
+      opacity: 0; 
+      transform: translateY(-10px); 
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .dropdown-content.show { 
+      display: block; 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+    .dropdown-content button { 
+      color: white; 
+      padding: 12px 16px; 
+      text-decoration: none; 
+      display: block; 
+      border: none; 
+      background: none; 
+      width: 100%; 
+      text-align: left; 
+      cursor: pointer; 
+      font-size: 14px; 
+      transition: background 0.3s ease;
+    }
+    .dropdown-content button:hover { background: rgba(58, 58, 58, 0.9); }
+    .section-title { font-size: 16px; font-weight: bold; color: #f0f0f0; }
+    .logout-btn { 
+      background: none;
+      color: white; 
+      padding: 12px 16px; 
+      border: none; 
+      width: 100%; 
+      text-align: left; 
+      cursor: pointer; 
+      font-size: 14px; 
+      font-weight: bold; 
+      transition: background 0.3s ease;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .logout-btn:hover { 
+      background: rgba(58, 58, 58, 0.9);
+      transform: none;
+    }
+    .section { 
+      display: none; 
+      padding: 15px; 
+      background: rgba(36, 36, 36, 0.9); 
+      min-height: 100vh; 
+      opacity: 0; 
+      transform: translateY(20px); 
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .section.active { 
+      display: block; 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+    .form { 
+      max-width: 100%; 
+      margin: 15px auto; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+      background: rgba(44, 44, 44, 0.9); 
+      padding: 20px; 
+      border-radius: 12px; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+      transition: transform 0.3s ease;
+    }
+    .form:hover { transform: translateY(-5px); }
+    .form label { 
+      color: #f0f0f0; 
+      font-size: 14px; 
+      font-weight: bold; 
+      margin-bottom: 5px; 
+    }
+    .form input, .form textarea { 
+      padding: 12px; 
+      border: none; 
+      border-radius: 8px; 
+      background: #333; 
+      color: #f5f5f5; 
+      font-size: 14px; 
+      transition: box-shadow 0.3s ease, transform 0.2s ease;
+    }
+    .form input:focus, .form textarea:focus { 
+      outline: none; 
+      box-shadow: 0 0 5px #4a90e2; 
+      transform: scale(1.02);
+    }
+    .form button { 
+      background: linear-gradient(135deg, #4a90e2, #357abd); 
+      padding: 12px; 
+      border: none; 
+      border-radius: 10px; 
+      color: white; 
+      cursor: pointer; 
+      font-size: 14px; 
+      font-weight: bold; 
+      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    }
+    .form button:hover { 
+      transform: scale(1.02); 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+    }
+    .photo-preview { 
+      display: flex; 
+      flex-wrap: nowrap;
+      gap: 10px; 
+      margin-top: 10px; 
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding-bottom: 5px; 
+    }
+    .photo-preview img { 
+      max-width: 100%;
+      height: auto;
+      max-height: 150px;
+      object-fit: contain; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .photo-preview img:hover { transform: scale(1.1); }
+    .order-list { 
+      display: grid; 
+      gap: 15px; 
+      padding: 10px; 
+    }
+    .order-card { 
+      background: rgba(44, 44, 44, 0.9); 
+      padding: 10px; 
+      border-radius: 12px; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+      transition: transform 0.3s ease;
+      animation: slideIn 0.5s ease-in-out; 
+      font-size: 14px; 
+    }
+    .order-card:hover { transform: translateY(-5px); }
+    .order-card p { 
+      color: #d4af37;
+    }
+    .order-card .photos { 
+      display: flex; 
+      flex-wrap: nowrap;
+      gap: 5px; 
+      margin: 5px 0; 
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding-bottom: 5px; 
+    }
+    .order-card img { 
+      max-width: 100%;
+      height: auto;
+      max-height: 100px;
+      object-fit: contain; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .order-card img:hover { transform: scale(1.1); }
+    .order-card details { 
+      margin-top: 5px; 
+      color: #f0f0f0; 
+      transition: all 0.3s ease;
+    }
+    .order-card summary { 
+      cursor: pointer; 
+      font-weight: bold; 
+      color: #d4af37;
+    }
+    .order-card textarea { 
+      width: 100%; 
+      padding: 10px; 
+      border: none; 
+      border-radius: 8px; 
+      background: #333; 
+      color: #f5f5f5; 
+      font-size: 14px; 
+      resize: none; 
+      transition: box-shadow 0.3s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); 
+    }
+    .order-card textarea:focus { 
+      outline: none; 
+      box-shadow: 0 0 5px #4a90e2; 
+    }
+    .order-card button { 
+      margin-top: 10px; 
+      background: linear-gradient(135deg, #4a90e2, #357abd); 
+      padding: 10px; 
+      border: none; 
+      border-radius: 10px; 
+      color: white; 
+      cursor: pointer; 
+      font-size: 14px; 
+      font-weight: bold; 
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3); 
+    }
+    .order-card button:hover { 
+      transform: scale(1.02); 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+    }
+    .services-checkboxes { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 5px; 
+      margin-top: 5px; 
+    }
+    .services-checkboxes label { 
+      display: flex; 
+      align-items: center; 
+      gap: 5px; 
+    }
+    .modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.9); 
+      z-index: 2000; 
+      justify-content: center; 
+      align-items: center; 
+      opacity: 0; 
+      transition: opacity 0.3s ease;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .modal.active { 
+      display: flex; 
+      opacity: 1; 
+    }
+    .modal img { 
+      max-width: 100%;
+      max-height: 80vh;
+      width: auto;
+      height: auto;
+      border-radius: 10px; 
+      transition: transform 0.3s ease;
+      object-fit: contain;
+    }
+    .modal-close-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 2001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+    .modal-close-btn:hover {
+      transform: scale(1.1);
+    }
+    .modal-content {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(36, 36, 36, 0.95);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+    }
+    .pagination { 
+      display: flex; 
+      justify-content: center; 
+      gap: 10px; 
+      margin: 15px 0; 
+    }
+    .pagination button { 
+      padding: 10px; 
+      background: linear-gradient(135deg, #4a90e2, #357abd); 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: background 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3); 
+    }
+    .pagination button:disabled { 
+      background: #666; 
+      cursor: not-allowed; 
+      box-shadow: none; 
+    }
+    #loading { 
+      position: fixed; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+      background: rgba(0,0,0,0.8); 
+      padding: 20px; 
+      border-radius: 12px; 
+      display: none; 
+      color: #fff; 
+      font-size: 16px; 
+      z-index: 3000; 
+      transition: opacity 0.3s ease;
+    }
+    #loading.active { opacity: 1; }
+    .existing-photos { 
+      display: flex; 
+      flex-wrap: nowrap;
+      gap: 10px; 
+      margin-top: 10px; 
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding-bottom: 5px; 
+    }
+    .existing-photos div { 
+      position: relative; 
+      flex-shrink: 0;
+    }
+    .existing-photos img { 
+      max-width: 100%;
+      height: auto;
+      max-height: 100px;
+      object-fit: contain; 
+      border-radius: 8px; 
+      transition: transform 0.2s ease;
+    }
+    .existing-photos img:hover { transform: scale(1.1); }
+    .existing-photos button { 
+      position: absolute; 
+      top: 0; 
+      right: 0; 
+      background: #e74c3c; 
+      padding: 5px; 
+      font-size: 12px; 
+      border-radius: 50%; 
+      width: 20px; 
+      height: 20px; 
+      line-height: 10px; 
+      transition: transform 0.2s ease;
+    }
+    .existing-photos button:hover { transform: scale(1.1); }
+
+    @media (max-width: 600px) {
+      .nav-container { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        padding: 5px;
+      }
+      .nav-left { 
+        width: 100%; 
+        justify-content: space-between; 
+      }
+      .dropdown { margin-right: 0; }
+      .dropbtn { 
+        padding: 10px 15px; 
+        font-size: 12px;
+      }
+      .dropdown-content { 
+        min-width: 100%;
+        left: 0; 
+      }
+      .logout-btn { 
+        margin-top: 0;
+      }
+      .section { padding: 10px; }
+      .form { 
+        padding: 15px; 
+        gap: 10px;
+      }
+      .form input, .form textarea { 
+        padding: 10px; 
+        font-size: 12px;
+      }
+      .form button { 
+        padding: 10px; 
+        font-size: 12px;
+      }
+      .order-list { gap: 10px; }
+      .order-card { 
+        font-size: 12px; 
+        padding: 8px;
+      }
+      .order-card img, .photo-preview img, .existing-photos img { 
+        max-height: 80px;
+      }
+      .order-card .photos, .photo-preview, .existing-photos { 
+        -webkit-overflow-scrolling: touch;
+      }
+      .pagination button { 
+        padding: 8px; 
+        font-size: 12px;
+      }
+      .modal img { 
+        max-width: 95vw;
+        max-height: 70vh;
+      }
+      .modal-close-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+        top: 10px;
+        right: 10px;
+      }
+      .modal-content {
+        padding: 15px;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">Загрузка...</div>
+  <div class="nav-container" style="display: none;" id="main-nav">
+    <div class="nav-left">
+      <div class="dropdown">
+        <button class="dropbtn" onclick="App.toggleDropdown()">Меню</button>
+        <div class="dropdown-content" id="dropdown-menu">
+          <button data-section="new">Новый заказ</button>
+          <button data-section="working">В работе</button>
+          <button data-section="done">Готово</button>
+          <button data-section="archive">Архив</button>
+          <button data-section="search">Поиск</button>
+          <button data-section="settings">Настройки</button>
+          <button class="logout-btn" onclick="App.logout()">Выход</button>
+        </div>
+      </div>
+      <span class="section-title" id="section-title">Новый заказ</span>
+    </div>
+  </div>
+  <main>
+    <section id="login-section" class="section active">
+      <form id="login-form" class="form">
+        <input type="text" id="username" placeholder="Логин" required>
+        <input type="password" id="password" placeholder="Пароль" required>
+        <button type="submit">Войти</button>
+      </form>
+    </section>
+    <section id="new-section" class="section">
+      <form id="order-form" class="form">
+        <input type="text" name="clientName" placeholder="ФИО клиента" required>
+        <input type="text" name="carNumber" placeholder="Госномер">
+        <input type="tel" name="phone" placeholder="Телефон">
+        <div class="services-checkboxes">
+          <label><input type="checkbox" name="service" value="Покраска дисков"> Покраска дисков</label>
+          <label><input type="checkbox" name="service" value="Правка геометрии"> Правка геометрии</label>
+          <label><input type="checkbox" name="service" value="Димед"> Димед</label>
+          <label><input type="checkbox" name="service" value="Иное"> Иное</label>
+          <label><input type="checkbox" name="service" value="Пескоструйка"> Пескоструйка</label>
+        </div>
+        <input type="text" name="color" placeholder="Цвет (необязательно)">
+        <textarea name="note" placeholder="Примечание"></textarea>
+        <input type="number" name="cost" placeholder="Стоимость (руб)" required min="0" step="0.01">
+        <input type="file" name="photos" id="photo-input" multiple accept="image/*">
+        <div id="photo-preview" class="photo-preview"></div>
+        <button type="submit">Создать заказ</button>
+      </form>
+    </section>
+    <section id="working-section" class="section"><div id="working-list" class="order-list"></div></section>
+    <section id="done-section" class="section"><div id="done-list" class="order-list"></div></section>
+    <section id="archive-section" class="section"><div id="archive-list" class="order-list"></div></section>
+    <section id="search-section" class="section">
+      <div class="form">
+        <input type="text" id="search-query" placeholder="Введите ключевое слово">
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <input type="date" id="search-start-date" placeholder="Дата начала">
+          <input type="date" id="search-end-date" placeholder="Дата окончания">
+        </div>
+        <button onclick="App.searchOrders()">Поиск</button>
+      </div>
+      <div id="search-list" class="order-list"></div>
+    </section>
+    <section id="settings-section" class="section">
+      <div class="form">
+        <h2>Управление пользователями</h2>
+        <div id="users-list" class="order-list"></div>
+        <form id="add-user-form" class="form">
+          <input type="text" name="username" placeholder="Логин" required>
+          <input type="password" name="password" placeholder="Пароль" required>
+          <button type="submit">Добавить пользователя</button>
+        </form>
+      </div>
+      <div class="form">
+        <h2>Отчеты</h2>
+        <form id="report-form" class="form">
+          <input type="date" name="startDate" required>
+          <input type="date" name="endDate" required>
+          <button type="submit">Сформировать отчет о доходах</button>
+        </form>
+        <div id="report-result"></div>
+      </div>
+      <div class="form">
+        <h2>Расходы</h2>
+        <form id="add-expense-form" class="form">
+          <input type="number" name="amount" placeholder="Сумма (руб)" required min="0" step="0.01">
+          <textarea name="note" placeholder="Примечание" required></textarea>
+          <button type="submit">Добавить расход</button>
+        </form>
+        <div id="expenses-list" class="order-list"></div>
+      </div>
+    </section>
+  </main>
+  <div id="imageModal" class="modal">
+    <button class="modal-close-btn" onclick="App.closeModal(null, 'imageModal')">×</button>
+    <img id="modalImage" src="" alt="Фото">
+  </div>
+  <div id="archiveModal" class="modal">
+    <button class="modal-close-btn" onclick="App.closeModal(null, 'archiveModal')">×</button>
+    <form id="archive-form" class="form">
+      <input type="file" name="finished_photos" id="archive-photo-input" multiple accept="image/*">
+      <button type="button" onclick="App.addMoreArchivePhotos()">Добавить еще фото</button>
+      <div id="archive-photo-preview" class="photo-preview"></div>
+      <textarea name="comment" placeholder="Комментарий"></textarea>
+      <button type="submit">Отправить в архив</button>
+    </form>
+  </div>
+  <div id="editModal" class="modal"></div>
+  <div id="addPhotosModal" class="modal"></div>
+  <div id="orderModal" class="modal"></div>
+
+  <script>
+    const App = {
+      currentOrderId: null,
+      page: 1,
+      perPage: 10,
+      token: 'fake-token',
+      username: 'admin1',
+      selectedPhotos: new DataTransfer(),
+      selectedArchivePhotos: new DataTransfer(),
+
+      init() {
+        document.addEventListener('DOMContentLoaded', () => {
+          document.getElementById('login-form').addEventListener('submit', e => this.login(e));
+          document.getElementById('order-form').addEventListener('submit', e => this.createOrder(e));
+          document.getElementById('archive-form').addEventListener('submit', e => this.archiveOrder(e));
+          document.getElementById('imageModal').addEventListener('click', e => this.closeModal(e, 'imageModal'));
+          document.getElementById('archiveModal').addEventListener('click', e => this.closeModal(e, 'archiveModal'));
+          document.getElementById('add-user-form').addEventListener('submit', e => this.addUser(e));
+          document.getElementById('report-form').addEventListener('submit', e => this.generateIncomeReport(e));
+          document.getElementById('add-expense-form').addEventListener('submit', e => this.addExpense(e));
+          document.getElementById('photo-input').addEventListener('change', e => this.previewPhotos(e));
+          document.getElementById('archive-photo-input').addEventListener('change', e => this.previewArchivePhotos(e));
+
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              document.querySelectorAll('.modal.active').forEach(modal => modal.classList.remove('active'));
+            }
+          });
+
+          if (!localStorage.getItem('orders')) localStorage.setItem('orders', JSON.stringify([]));
+          if (!localStorage.getItem('users')) localStorage.setItem('users', JSON.stringify([{ username: 'admin1', password: '12345' }]));
+          if (!localStorage.getItem('expenses')) localStorage.setItem('expenses', JSON.stringify([]));
+          
+          this.login(null, true);
+        });
+      },
+
+      toggleDropdown() {
+        document.getElementById('dropdown-menu').classList.toggle('show');
+      },
+
+      login(e, auto = false) {
+        if (!auto) e.preventDefault();
+        
+        document.getElementById('main-nav').style.display = 'flex';
+        document.getElementById('login-section').classList.remove('active');
+        localStorage.setItem('token', this.token);
+        localStorage.setItem('username', this.username);
+        
+        this.switchSection('new');
+        document.querySelectorAll('.dropdown-content button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            this.switchSection(btn.dataset.section);
+            document.getElementById('dropdown-menu').classList.remove('show');
+          });
+        });
+      },
+
+      switchSection(sectionId) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        const section = document.getElementById(`${sectionId}-section`);
+        if (sectionId === 'settings' && this.username !== 'admin1') {
+          alert('Доступ только для администратора');
+          return;
+        }
+        section.classList.add('active');
+        document.getElementById('section-title').textContent = this.getSectionTitle(sectionId);
+        if (['working', 'done', 'archive'].includes(sectionId)) {
+          this.page = 1;
+          this.loadOrders(sectionId === 'working' ? 'В работе' : sectionId === 'done' ? 'Готово' : 'Архив');
+        } else if (sectionId === 'settings') {
+          this.loadUsers();
+          this.loadExpenses();
+        }
+      },
+
+      getSectionTitle(sectionId) {
+        const titles = { new: 'Новый заказ', working: 'В работе', done: 'Готово', archive: 'Архив', search: 'Поиск', settings: 'Настройки' };
+        return titles[sectionId] || '';
+      },
+
+      async compressImage(file) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            img.src = e.target.result;
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              const maxWidth = 1280;
+              const maxHeight = 720;
+              let width = img.width;
+              let height = img.height;
+              if (width > height) {
+                if (width > maxWidth) {
+                  height *= maxWidth / width;
+                  width = maxWidth;
+                }
+              } else {
+                if (height > maxHeight) {
+                  width *= maxHeight / height;
+                  height = maxHeight;
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              ctx.drawImage(img, 0, 0, width, height);
+              canvas.toBlob(blob => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', 0.6);
+            };
+          };
+          reader.readAsDataURL(file);
+        });
+      },
+
+      async previewPhotos(event) {
+        this.showLoading(true);
+        const files = event.target.files;
+        const preview = document.getElementById('photo-preview');
+        preview.innerHTML = '';
+        this.selectedPhotos = new DataTransfer();
+        for (let i = 0; i < Math.min(files.length, 4); i++) {
+          const compressedFile = await this.compressImage(files[i]);
+          this.selectedPhotos.items.add(compressedFile);
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(compressedFile);
+          preview.appendChild(img);
+        }
+        event.target.files = this.selectedPhotos.files;
+        this.showLoading(false);
+      },
+
+      async previewArchivePhotos(event) {
+        this.showLoading(true);
+        const files = event.target.files;
+        const preview = document.getElementById('archive-photo-preview');
+        preview.innerHTML = '';
+        this.selectedArchivePhotos = new DataTransfer();
+        for (let i = 0; i < Math.min(files.length, 4); i++) {
+          const compressedFile = await this.compressImage(files[i]);
+          this.selectedArchivePhotos.items.add(compressedFile);
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(compressedFile);
+          preview.appendChild(img);
+        }
+        event.target.files = this.selectedArchivePhotos.files;
+        this.showLoading(false);
+      },
+
+      addMoreArchivePhotos() {
+        if (this.selectedArchivePhotos.files.length >= 4) {
+          alert('Максимум 4 фото!');
+          return;
+        }
+        document.getElementById('archive-photo-input').click();
+      },
+
+      createOrder(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const selectedServices = Array.from(e.target.querySelectorAll('input[name="service"]:checked')).map(cb => cb.value).join(', ');
+        if (!selectedServices) {
+          alert('Выберите хотя бы одну услугу!');
+          return;
+        }
+        if (this.selectedPhotos.files.length > 4) {
+          alert('Максимум 4 фото!');
+          return;
+        }
+        const orders = JSON.parse(localStorage.getItem('orders HEART'));
+        const orderNumber = `ORD-${Date.now()}`;
+        const photos = Array.from(this.selectedPhotos.files).map(file => URL.createObjectURL(file));
+        const newOrder = {
+          id: Date.now(),
+          order_number: orderNumber,
+          full_name: formData.get('clientName'),
+          car_number: formData.get('carNumber'),
+          phone: formData.get('phone'),
+          service: selectedServices,
+          color: formData.get('color'),
+          notes: formData.get('note'),
+          cost: parseFloat(formData.get('cost')),
+          status: 'В работе',
+          created_at: new Date().toISOString(),
+          created_by: this.username,
+          photos: photos.join(','),
+          finished_photos: '',
+          comments: ''
+        };
+        orders.push(newOrder);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        alert(`Заказ ${orderNumber} создан!`);
+        e.target.reset();
+        this.selectedPhotos = new DataTransfer();
+        document.getElementById('photo-input').files = this.selectedPhotos.files;
+        document.getElementById('photo-preview').innerHTML = '';
+        this.switchSection('working');
+      },
+
+      loadOrders(status) {
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders')).filter(o => o.status === status);
+        const start = (this.page - 1) * this.perPage;
+        const end = start + this.perPage;
+        const paginatedOrders = orders.slice(start, end);
+        const list = document.getElementById(`${status === 'В работе' ? 'working' : status === 'Готово' ? 'done' : 'archive'}-list`);
+        list.innerHTML = paginatedOrders.length ? '' : '<p>Нет заказов</p>';
+        paginatedOrders.forEach(order => {
+          const card = document.createElement('div');
+          card.className = 'order-card';
+          const comments = order.comments ? order.comments.split(' | ').join('<br>') : 'Нет комментариев';
+          const allPhotos = [...new Set([
+            ...(order.photos ? order.photos.split(',') : []),
+            ...(order.finished_photos ? order.finished_photos.split(',') : [])
+          ])];
+          card.innerHTML = `
+            <p><strong>Клиент:</strong> ${order.full_name}</p>
+            <p><strong>Телефон:</strong> ${order.phone || 'Не указан'}</p>
+            <div class="photos">
+              ${allPhotos.map(p => `<img src="${p}" onclick="App.showImage('${p}')">`).join('')}
+            </div>
+            <details>
+              <summary>Подробности</summary>
+              <p><strong>Заказ:</strong> ${order.order_number}</p>
+              <p><strong>Госномер:</strong> ${order.car_number || 'Не указан'}</p>
+              <p><strong>Услуги:</strong> ${order.service}</p>
+              <p><strong>Стоимость:</strong> ${order.cost} руб</p>
+              <p><strong>Создан:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+              <p><strong>Создал:</strong> ${order.created_by}</p>
+              <p><strong>Примечания:</strong> ${order.notes || 'Нет примечаний'}</p>
+              <p><strong>Комментарии:</strong> ${comments}</p>
+              <textarea placeholder="Комментарий"></textarea>
+              <button onclick="App.addComment(${order.id}, this.previousElementSibling.value, '${status}')">Оставить комментарий</button>
+              <button onclick="App.addPhotos(${order.id}, '${status}')">Добавить фото</button>
+              <button onclick="App.editOrder(${order.id})">Редактировать</button>
+            </details>
+            ${status !== 'Архив' ? `
+              <button onclick="App.moveOrder(${order.id}, '${status === 'В работе' ? 'Готово' : 'Архив'}', this.parentElement.querySelector('textarea').value)">
+                ${status === 'В работе' ? 'Заказ выполнен' : 'Передать клиенту'}
+              </button>` : this.username === 'admin1' ? `<button onclick="App.deleteOrder(${order.id})">Удалить</button>` : ''}
+          `;
+          list.appendChild(card);
+        });
+        this.renderPagination(orders.length, status);
+        this.showLoading(false);
+      },
+
+      addComment(orderId, comment, status) {
+        if (!comment.trim()) {
+          alert('Введите комментарий');
+          return;
+        }
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders'));
+        const order = orders.find(o => o.id === orderId);
+        order.comments = order.comments ? `${order.comments} | ${new Date().toLocaleString()}: ${comment} (${this.username})` : `${new Date().toLocaleString()}: ${comment} (${this.username})`;
+        localStorage.setItem('orders', JSON.stringify(orders));
+        this.loadOrders(status);
+        this.showLoading(false);
+      },
+
+      moveOrder(orderId, newStatus, comment) {
+        if (newStatus === 'Архив') {
+          this.currentOrderId = orderId;
+          document.getElementById('archiveModal').classList.add('active');
+          document.getElementById('archive-form').querySelector('textarea').value = comment;
+          return;
+        }
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders'));
+        const order = orders.find(o => o.id === orderId);
+        order.status = newStatus;
+        if (comment) {
+          order.comments = order.comments ? `${order.comments} | ${new Date().toLocaleString()}: ${comment} (${this.username})` : `${new Date().toLocaleString()}: ${comment} (${this.username})`;
+        }
+        localStorage.setItem('orders', JSON.stringify(orders));
+        this.loadOrders(newStatus);
+        if (newStatus === 'Готово') this.loadOrders('В работе');
+        this.showLoading(false);
+      },
+
+      archiveOrder(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const finishedPhotos = Array.from(this.selectedArchivePhotos.files).map(file => URL.createObjectURL(file));
+        if (finishedPhotos.length > 4) {
+          alert('Максимум 4 фото!');
+          return;
+        }
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders'));
+        const order = orders.find(o => o.id === this.currentOrderId);
+        order.status = 'Архив';
+        order.finished_photos = finishedPhotos.join(',');
+        const comment = formData.get('comment');
+        if (comment) {
+          order.comments = order.comments ? `${order.comments} | ${new Date().toLocaleString()}: ${comment} (${this.username})` : `${new Date().toLocaleString()}: ${comment} (${this.username})`;
+        }
+        localStorage.setItem('orders', JSON.stringify(orders));
+        document.getElementById('archiveModal').classList.remove('active');
+        this.selectedArchivePhotos = new DataTransfer();
+        document.getElementById('archive-photo-input').files = this.selectedArchivePhotos.files;
+        document.getElementById('archive-photo-preview').innerHTML = '';
+        this.loadOrders('Архив');
+        this.loadOrders('Готово');
+        this.showLoading(false);
+      },
+
+      deleteOrder(orderId) {
+        if (!confirm('Удалить заказ?')) return;
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders')).filter(o => o.id !== orderId);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        this.loadOrders('Архив');
+        this.showLoading(false);
+      },
+
+      searchOrders() {
+        const query = document.getElementById('search-query').value.trim().toLowerCase();
+        const startDate = document.getElementById('search-start-date').value;
+        const endDate = document.getElementById('search-end-date').value;
+        if (!query && !startDate && !endDate) {
+          alert('Введите ключевое слово или укажите период для поиска');
+          return;
+        }
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders')).filter(order => {
+          const matchesQuery = query ? (
+            order.full_name.toLowerCase().includes(query) ||
+            (order.car_number && order.car_number.toLowerCase().includes(query)) ||
+            (order.phone && order.phone.includes(query)) ||
+            order.service.toLowerCase().includes(query)
+          ) : true;
+          const orderDate = new Date(order.created_at);
+          const matchesStart = startDate ? new Date(startDate) <= orderDate : true;
+          const matchesEnd = endDate ? new Date(endDate) >= orderDate : true;
+          return matchesQuery && matchesStart && matchesEnd;
+        });
+        const list = document.getElementById('search-list');
+        list.innerHTML = orders.length ? '' : '<p>Заказы не найдены</p>';
+        orders.forEach(order => {
+          const card = document.createElement('div');
+          card.className = 'order-card';
+          const comments = order.comments ? order.comments.split(' | ').join('<br>') : 'Нет комментариев';
+          const allPhotos = [...new Set([
+            ...(order.photos ? order.photos.split(',') : []),
+            ...(order.finished_photos ? order.finished_photos.split(',') : [])
+          ])];
+          card.innerHTML = `
+            <p><strong>Клиент:</strong> ${order.full_name}</p>
+            <p><strong>Телефон:</strong> ${order.phone || 'Не указан'}</p>
+            <p><strong>Статус:</strong> ${order.status}</p>
+            <div class="photos">
+              ${allPhotos.map(p => `<img src="${p}" onclick="App.showImage('${p}')">`).join('')}
+            </div>
+            <details>
+              <summary>Подробности</summary>
+              <p><strong>Заказ:</strong> ${order.order_number}</p>
+              <p><strong>Госномер:</strong> ${order.car_number || 'Не указан'}</p>
+              <p><strong>Услуги:</strong> ${order.service}</p>
+              <p><strong>Стоимость:</strong> ${order.cost} руб</p>
+              <p><strong>Создан:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+              <p><strong>Создал:</strong> ${order.created_by}</p>
+              <p><strong>Примечания:</strong> ${order.notes || 'Нет примечаний'}</p>
+              <p><strong>Комментарии:</strong> ${comments}</p>
+            </details>
+          `;
+          list.appendChild(card);
+        });
+        this.showLoading(false);
+      },
+
+      showImage(src) {
+        document.getElementById('modalImage').src = src;
+        document.getElementById('imageModal').classList.add('active');
+      },
+
+      closeModal(e, modalId) {
+        if (!e || e.target === e.currentTarget) {
+          document.getElementById(modalId).classList.remove('active');
+        }
+      },
+
+      renderPagination(total, status) {
+        const pages = Math.ceil(total / this.perPage);
+        const container = document.querySelector(`#${status === 'В работе' ? 'working' : status === 'Готово' ? 'done' : 'archive'}-section`);
+        let pagination = container.querySelector('.pagination');
+        if (!pagination) {
+          pagination = document.createElement('div');
+          pagination.className = 'pagination';
+          container.appendChild(pagination);
+        }
+        pagination.innerHTML = `
+          <button onclick="App.changePage(${this.page - 1}, '${status}')" ${this.page === 1 ? 'disabled' : ''}>Назад</button>
+          <span>Страница ${this.page} из ${pages}</span>
+          <button onclick="App.changePage(${this.page + 1}, '${status}')" ${this.page === pages ? 'disabled' : ''}>Вперед</button>
+        `;
+      },
+
+      changePage(newPage, status) {
+        this.page = newPage;
+        this.loadOrders(status);
+      },
+
+      showLoading(show) {
+        const loading = document.getElementById('loading');
+        loading.style.display = show ? 'block' : 'none';
+        loading.classList.toggle('active', show);
+      },
+
+      logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        this.token = null;
+        this.username = null;
+        document.getElementById('main-nav').style.display = 'none';
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('login-section').classList.add('active');
+      },
+
+      loadUsers() {
+        const users = JSON.parse(localStorage.getItem('users'));
+        const list = document.getElementById('users-list');
+        list.innerHTML = '';
+        users.forEach(user => {
+          const card = document.createElement('div');
+          card.className = 'order-card';
+          card.innerHTML = `
+            <p><strong>Логин:</strong> ${user.username}</p>
+            <p><strong>Пароль:</strong> ${user.password}</p>
+            <input type="text" placeholder="Новый логин" id="new-username-${user.username}">
+            <input type="password" placeholder="Новый пароль" id="new-password-${user.username}">
+            <button onclick="App.updateUser('${user.username}')">Изменить</button>
+            <button onclick="App.deleteUser('${user.username}')">Удалить</button>
+          `;
+          list.appendChild(card);
+        });
+      },
+
+      addUser(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const username = formData.get('username');
+        const password = formData.get('password');
+        const users = JSON.parse(localStorage.getItem('users'));
+        if (users.find(u => u.username === username)) {
+          alert('Пользователь с таким логином уже существует');
+          return;
+        }
+        users.push({ username, password });
+        localStorage.setItem('users', JSON.stringify(users));
+        alert('Пользователь добавлен');
+        e.target.reset();
+        this.loadUsers();
+      },
+
+      updateUser(username) {
+        const newUsername = document.getElementById(`new-username-${username}`).value;
+        const newPassword = document.getElementById(`new-password-${username}`).value;
+        if (!newUsername && !newPassword) {
+          alert('Введите новый логин или пароль');
+          return;
+        }
+        this.showLoading(true);
+        const users = JSON.parse(localStorage.getItem('users'));
+        const user = users.find(u => u.username === username);
+        if (newUsername) user.username = newUsername;
+        if (newPassword) user.password = newPassword;
+        localStorage.setItem('users', JSON.stringify(users));
+        alert('Пользователь обновлен');
+        this.loadUsers();
+        this.showLoading(false);
+      },
+
+      deleteUser(username) {
+        if (!confirm('Удалить пользователя?')) return;
+        this.showLoading(true);
+        const users = JSON.parse(localStorage.getItem('users')).filter(u => u.username !== username);
+        localStorage.setItem('users', JSON.stringify(users));
+        alert('Пользователь удален');
+        this.loadUsers();
+        this.showLoading(false);
+      },
+
+      generateIncomeReport(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const startDate = new Date(formData.get('startDate'));
+        const endDate = new Date(formData.get('endDate'));
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders')).filter(o => {
+          const orderDate = new Date(o.created_at);
+          return orderDate >= startDate && orderDate <= endDate && o.status === 'Архив';
+        });
+        const total = orders.reduce((sum, o) => sum + o.cost, 0);
+        document.getElementById('report-result').innerHTML = `
+          <p>Доход за период ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}: ${total} руб</p>
+        `;
+        this.showLoading(false);
+      },
+
+      addExpense(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const amount = parseFloat(formData.get('amount'));
+        const note = formData.get('note');
+        this.showLoading(true);
+        const expenses = JSON.parse(localStorage.getItem('expenses'));
+        expenses.push({ id: Date.now(), amount, note, created_at: new Date().toISOString() });
+        localStorage.setItem('expenses', JSON.stringify(expenses));
+        alert('Расход добавлен');
+        e.target.reset();
+        this.loadExpenses();
+        this.showLoading(false);
+      },
+
+      loadExpenses() {
+        const expenses = JSON.parse(localStorage.getItem('expenses'));
+        const list = document.getElementById('expenses-list');
+        list.innerHTML = '';
+        expenses.forEach(expense => {
+          const card = document.createElement('div');
+          card.className = 'order-card';
+          card.innerHTML = `
+            <p><strong>Сумма:</strong> ${expense.amount} руб</p>
+            <p><strong>Дата:</strong> ${new Date(expense.created_at).toLocaleString()}</p>
+            <p><strong>Примечание:</strong> ${expense.note}</p>
+          `;
+          list.appendChild(card);
+        });
+      },
+
+      editOrder(orderId) {
+        this.currentOrderId = orderId;
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders'));
+        const order = orders.find(o => o.id === orderId);
+        const services = order.service ? order.service.split(', ') : [];
+        const existingPhotos = order.photos ? order.photos.split(',') : [];
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.id = 'editModal';
+        modal.innerHTML = `
+          <button class="modal-close-btn" onclick="App.closeModal(null, 'editModal')">×</button>
+          <div class="modal-content">
+            <form id="edit-form" class="form">
+              <label for="clientName">ФИО клиента</label>
+              <input type="text" name="clientName" value="${order.full_name || ''}" required>
+              <label for="carNumber">Госномер</label>
+              <input type="text" name="carNumber" value="${order.car_number || ''}">
+              <label for="phone">Телефон</label>
+              <input type="tel" name="phone" value="${order.phone || ''}">
+              <label>Услуги</label>
+              <div class="services-checkboxes">
+                <label><input type="checkbox" name="service" value="Покраска дисков" ${services.includes('Покраска дисков') ? 'checked' : ''}> Покраска дисков</label>
+                <label><input type="checkbox" name="service" value="Правка геометрии" ${services.includes('Правка геометрии') ? 'checked' : ''}> Правка геометрии</label>
+                <label><input type="checkbox" name="service" value="Димед" ${services.includes('Димед') ? 'checked' : ''}> Димед</label>
+                <label><input type="checkbox" name="service" value="Иное" ${services.includes('Иное') ? 'checked' : ''}> Иное</label>
+                <label><input type="checkbox" name="service" value="Пескоструйка" ${services.includes('Пескоструйка') ? 'checked' : ''}> Пескоструйка</label>
+              </div>
+              <label for="color">Цвет</label>
+              <input type="text" name="color" value="${order.color || ''}">
+              <label for="note">Примечание</label>
+              <textarea name="note">${order.notes || ''}</textarea>
+              <label for="cost">Стоимость (руб)</label>
+              <input type="number" name="cost" value="${order.cost || 0}" required min="0" step="0.01">
+              <label>Текущие фото</label>
+              <div id="existing-photos" class="existing-photos">
+                ${existingPhotos.map(photo => `
+                  <div>
+                    <img src="${photo}" alt="Фото">
+                    <button type="button" onclick="App.deletePhoto(${order.id}, '${photo}', this)">×</button>
+                  </div>
+                `).join('')}
+              </div>
+              <label for="edit-photo-input">Добавить новые фото</label>
+              <input type="file" name="photos" id="edit-photo-input" multiple accept="image/*">
+              <div id="edit-photo-preview" class="photo-preview"></div>
+              <button type="submit">Сохранить изменения</button>
+            </form>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        const editForm = document.getElementById('edit-form');
+        const editPhotoInput = document.getElementById('edit-photo-input');
+        
+        editForm.addEventListener('submit', (e) => this.saveEditOrder(e, order.status));
+        editPhotoInput.addEventListener('change', (e) => this.previewEditPhotos(e));
+        modal.addEventListener('click', (e) => this.closeModal(e, 'editModal'));
+        
+        this.showLoading(false);
+      },
+
+      async previewEditPhotos(event) {
+        this.showLoading(true);
+        const files = event.target.files;
+        const preview = document.getElementById('edit-photo-preview');
+        preview.innerHTML = '';
+        this.selectedPhotos = new DataTransfer();
+        for (let i = 0; i < Math.min(files.length, 4); i++) {
+          const compressedFile = await this.compressImage(files[i]);
+          this.selectedPhotos.items.add(compressedFile);
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(compressedFile);
+          preview.appendChild(img);
+        }
+        event.target.files = this.selectedPhotos.files;
+        this.showLoading(false);
+      },
+
+      saveEditOrder(e, status) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const selectedServices = Array.from(e.target.querySelectorAll('input[name="service"]:checked'))
+          .map(cb => cb.value)
+          .join(', ');
+          
+        if (!selectedServices) {
+          alert('Выберите хотя бы одну услугу!');
+          return;
+        }
+
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders'));
+        const orderIndex = orders.findIndex(o => o.id === this.currentOrderId);
+        
+        if (orderIndex === -1) {
+          alert('Заказ не найден!');
+          this.showLoading(false);
+          return;
+        }
+
+        const updatedOrder = {
+          ...orders[orderIndex],
+          full_name: formData.get('clientName'),
+          car_number: formData.get('carNumber'),
+          phone: formData.get('phone'),
+          service: selectedServices,
+          color: formData.get('color'),
+          notes: formData.get('note'),
+          cost: parseFloat(formData.get('cost'))
+        };
+
+        if (this.selectedPhotos.files.length) {
+          const newPhotos = Array.from(this.selectedPhotos.files).map(file => URL.createObjectURL(file));
+          updatedOrder.photos = updatedOrder.photos 
+            ? `${updatedOrder.photos},${newPhotos.join(',')}` 
+            : newPhotos.join(',');
+        }
+
+        orders[orderIndex] = updatedOrder;
+        localStorage.setItem('orders', JSON.stringify(orders));
+        
+        alert('Заказ успешно обновлен!');
+        document.getElementById('editModal').remove();
+        this.selectedPhotos = new DataTransfer();
+        this.loadOrders(status);
+        this.showLoading(false);
+      },
+
+      deletePhoto(orderId, photoName, buttonElement) {
+        if (!confirm('Удалить это фото?')) return;
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders'));
+        const order = orders.find(o => o.id === orderId);
+        order.photos = order.photos.split(',').filter(p => p !== photoName).join(',');
+        localStorage.setItem('orders', JSON.stringify(orders));
+        buttonElement.parentElement.remove();
+        this.showLoading(false);
+      },
+
+      addPhotos(orderId, status) {
+        this.currentOrderId = orderId;
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.id = 'addPhotosModal';
+        modal.innerHTML = `
+          <button class="modal-close-btn" onclick="App.closeModal(null, 'addPhotosModal')">×</button>
+          <div class="modal-content">
+            <form id="add-photos-form" class="form">
+              <input type="file" name="photos" id="add-photos-input" multiple accept="image/*">
+              <div id="add-photos-preview" class="photo-preview"></div>
+              <button type="submit">Добавить фото</button>
+            </form>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        document.getElementById('add-photos-form').addEventListener('submit', e => this.saveAdditionalPhotos(e, status));
+        document.getElementById('add-photos-input').addEventListener('change', e => this.previewAdditionalPhotos(e));
+        modal.addEventListener('click', e => this.closeModal(e, 'addPhotosModal'));
+      },
+
+      async previewAdditionalPhotos(event) {
+        this.showLoading(true);
+        const files = event.target.files;
+        const preview = document.getElementById('add-photos-preview');
+        preview.innerHTML = '';
+        this.selectedPhotos = new DataTransfer();
+        for (let i = 0; i < Math.min(files.length, 4); i++) {
+          const compressedFile = await this.compressImage(files[i]);
+          this.selectedPhotos.items.add(compressedFile);
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(compressedFile);
+          preview.appendChild(img);
+        }
+        event.target.files = this.selectedPhotos.files;
+        this.showLoading(false);
+      },
+
+      saveAdditionalPhotos(e, status) {
+        e.preventDefault();
+        if (this.selectedPhotos.files.length > 4) {
+          alert('Максимум 4 фото!');
+          return;
+        }
+        this.showLoading(true);
+        const orders = JSON.parse(localStorage.getItem('orders'));
+        const order = orders.find(o => o.id === this.currentOrderId);
+        const newPhotos = Array.from(this.selectedPhotos.files).map(file => URL.createObjectURL(file));
+        order.photos = order.photos ? `${order.photos},${newPhotos.join(',')}` : newPhotos.join(',');
+        localStorage.setItem('orders', JSON.stringify(orders));
+        alert('Фото добавлены!');
+        document.getElementById('addPhotosModal').remove();
+        this.selectedPhotos = new DataTransfer();
+        this.loadOrders(status);
+        this.showLoading(false);
+      }
+    };
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @media (max-width: 600px) {
+        #editModal .modal-content {
+          padding: 15px;
+          width: 95vw;
+          max-height: 80vh;
+          overflow-y: auto;
+        }
+        #editModal .form {
+          padding: 10px;
+          gap: 8px;
+        }
+        #editModal input,
+        #editModal textarea {
+          font-size: 12px;
+          padding: 8px;
+        }
+        #editModal button {
+          font-size: 12px;
+          padding: 8px;
+        }
+        #editModal .existing-photos img,
+        #editModal .photo-preview img {
+          max-height: 80px;
+        }
+        #editModal .services-checkboxes label {
+          font-size: 12px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    App.init();
+  </script>
+</body>
+</html>
